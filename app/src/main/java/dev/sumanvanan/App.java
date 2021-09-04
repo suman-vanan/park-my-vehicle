@@ -3,12 +3,29 @@
  */
 package dev.sumanvanan;
 
-public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+import dev.sumanvanan.model.ParsedInput;
+import dev.sumanvanan.utility.InputParser;
+import org.apache.commons.io.IOUtils;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+public class App {
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        // to pass args, in project folder run `./gradlew run --args="<absolute_path_of_file>"`
+        // use default file if no filepath is passed as args
+        String filePath = "src/main/resources/input.txt";
+        if (args.length > 0) {
+            filePath = args[0];
+        }
+
+        // stop execution if exception is thrown
+        try (FileInputStream fis = new FileInputStream(filePath)) {
+            String inputString = IOUtils.toString(fis, StandardCharsets.UTF_8);
+            ParsedInput parsedInput = InputParser.parse(inputString);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
