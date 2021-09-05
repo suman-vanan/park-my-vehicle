@@ -4,12 +4,16 @@
 package dev.sumanvanan;
 
 import dev.sumanvanan.model.ParsedInput;
+import dev.sumanvanan.model.VehicleExitInfo;
+import dev.sumanvanan.model.VehicleParkTransaction;
 import dev.sumanvanan.utility.InputParser;
 import org.apache.commons.io.IOUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
+import java.util.Queue;
 
 public class App {
     public static void main(String[] args) {
@@ -24,6 +28,27 @@ public class App {
         try (FileInputStream fis = new FileInputStream(filePath)) {
             String inputString = IOUtils.toString(fis, StandardCharsets.UTF_8);
             ParsedInput parsedInput = InputParser.parse(inputString);
+
+            Queue<VehicleParkTransaction> vehicleQueue = parsedInput.getVehicleParkTransactions();
+            CarParkValet parkValet = new CarParkValet(parsedInput.getNumOfCarParkingLots(), parsedInput.getNumOfMotorcycleParkingLots());
+
+            while (!vehicleQueue.isEmpty()) {
+                VehicleParkTransaction vehicleParkTransaction = vehicleQueue.remove();
+                if (vehicleParkTransaction.isEntry()) {
+                    Optional<Integer> lotNumOptional = parkValet.admit(vehicleParkTransaction.getVehicle(), vehicleParkTransaction.getTime());
+                    if (lotNumOptional.isPresent()) {
+                        System.out.println("Accept " + vehicleParkTransaction.getVehicle().getType() + lotNumOptional.get());
+                    } else {
+                        System.out.println("Reject");
+                    }
+                } else {
+                    Optional<VehicleExitInfo> vehicleExitInfoOptional = parkValet.exit(vehicleParkTransaction.getVehicle(), vehicleParkTransaction.getTime());
+                    if (vehicleExitInfoOptional.isPresent()) {
+                        VehicleExitInfo exitInfo = vehicleExitInfoOptional.get();
+                        System.out.println("" + vehicleParkTransaction.getVehicle().getType() + exitInfo.getReleasedLotNumber() + " " + exitInfo.getParkingFee());
+                    }
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -2,12 +2,12 @@ package dev.sumanvanan.model;
 
 import java.time.LocalDateTime;
 
-public class ParkedMotorcycle extends Motorcycle {
+public class ParkedVehicle extends Vehicle {
 
     private final LocalDateTime startTime;
 
-    public ParkedMotorcycle(String vehicleNumber, LocalDateTime startTime) {
-        super(vehicleNumber);
+    public ParkedVehicle(String vehicleNumber, Type type, LocalDateTime startTime) {
+        super(vehicleNumber, type);
         this.startTime = startTime;
     }
 
@@ -17,7 +17,7 @@ public class ParkedMotorcycle extends Motorcycle {
 
     @Override
     public String toString() {
-        return "ParkedMotorcycle{" +
+        return "ParkedVehicle{" +
                 "startTime=" + startTime +
                 "} " + super.toString();
     }

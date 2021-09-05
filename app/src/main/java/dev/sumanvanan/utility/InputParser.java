@@ -73,9 +73,9 @@ public final class InputParser {
 
     private static Optional<Vehicle> generateVehicle(String vehicleType, String vehicleNumber) {
         if (CAR.equals(vehicleType)) {
-            return Optional.of(new Car(vehicleNumber));
+            return Optional.of(new Vehicle(vehicleNumber, Vehicle.Type.CAR));
         } else if (MOTORCYCLE.equals(vehicleType)) {
-            return Optional.of(new Motorcycle(vehicleNumber));
+            return Optional.of(new Vehicle(vehicleNumber, Vehicle.Type.MOTORCYCLE));
         } else {
             return Optional.empty();
         }
