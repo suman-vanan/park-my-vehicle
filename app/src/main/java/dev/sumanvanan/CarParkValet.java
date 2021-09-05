@@ -6,7 +6,9 @@ import dev.sumanvanan.model.VehicleExitInfo;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class CarParkValet {
 
@@ -15,10 +17,14 @@ public class CarParkValet {
 
     private final ParkedVehicle[] carLots;
     private final ParkedVehicle[] motorcycleLots;
+    private final Set<String> parkedVehicleNumbers;
 
     public CarParkValet(int numCarLots, int numMotorcycleLots) {
+        if (numCarLots < 0 || numMotorcycleLots < 0)
+            throw new IllegalArgumentException("Number of parking lots cannot be a negative number");
         carLots = new ParkedVehicle[numCarLots];
         motorcycleLots = new ParkedVehicle[numMotorcycleLots];
+        parkedVehicleNumbers = new HashSet<>();
     }
 
     public Optional<Integer> admit(Vehicle vehicle, LocalDateTime startTime) {
@@ -32,6 +38,9 @@ public class CarParkValet {
     }
 
     private Optional<Integer> admitVehicleToSpecificLotType(ParkedVehicle[] parkingLots, Vehicle vehicle, LocalDateTime startTime) {
+        // if a vehicle with same vehicleNumber has been parked in any of the lots, throw an exception
+        if (parkedVehicleNumbers.contains(vehicle.getVehicleNumber()))
+            throw new IllegalArgumentException("Vehicle with same vehicleNumber already parked");
         for (int i = 0; i < parkingLots.length; i++) {
             ParkedVehicle parkingLot = parkingLots[i];
             // if lot is unoccupied, we can park in this lot
@@ -39,6 +48,7 @@ public class CarParkValet {
             if (parkingLot == null) {
                 ParkedVehicle vehicleToBeParked = new ParkedVehicle(vehicle.getVehicleNumber(), vehicle.getType(), startTime);
                 parkingLots[i] = vehicleToBeParked;
+                parkedVehicleNumbers.add(vehicle.getVehicleNumber());
                 return Optional.of(i + 1);
             }
         }
@@ -70,6 +80,7 @@ public class CarParkValet {
                 }
                 long parkingFee = (parkingMinutes / 60) * parkingFeePerHour;
                 parkingLots[i] = null; // release parking lot
+                parkedVehicleNumbers.remove(vehicle.getVehicleNumber());
                 return Optional.of(new VehicleExitInfo(i + 1, parkingFee));
             }
         }

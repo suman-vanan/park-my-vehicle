@@ -1,5 +1,7 @@
 package dev.sumanvanan.model;
 
+import java.util.Objects;
+
 public class Vehicle {
 
     private final String vehicleNumber;
@@ -11,8 +13,8 @@ public class Vehicle {
     }
 
     public Vehicle(String vehicleNumber, Type type) {
-        this.vehicleNumber = vehicleNumber;
-        this.type = type;
+        this.vehicleNumber = Objects.requireNonNull(vehicleNumber, "vehicleNumber must not be null");
+        this.type = Objects.requireNonNull(type, "type must not be null");
     }
 
     public String getVehicleNumber() {

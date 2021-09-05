@@ -4,6 +4,7 @@
 package dev.sumanvanan;
 
 import dev.sumanvanan.model.ParsedInput;
+import dev.sumanvanan.model.Vehicle;
 import dev.sumanvanan.model.VehicleExitInfo;
 import dev.sumanvanan.model.VehicleParkTransaction;
 import dev.sumanvanan.utility.InputParser;
@@ -12,6 +13,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.StringJoiner;
@@ -42,17 +44,21 @@ public class App {
         }
     }
 
+    private static final Map<Vehicle.Type, String> vehicleTypeToOutputString = Map.of(
+            Vehicle.Type.CAR, "CarLot",
+            Vehicle.Type.MOTORCYCLE, "MotorcycleLot");
+
     private static String processEvent(CarParkValet parkValet, VehicleParkTransaction vehicleParkTransaction) {
         // only two types of events: entry & exit
         if (vehicleParkTransaction.isEntry()) {
             Optional<Integer> lotNumOptional = parkValet.admit(vehicleParkTransaction.getVehicle(), vehicleParkTransaction.getTime());
             return lotNumOptional
-                    .map(integer -> "Accept " + vehicleParkTransaction.getVehicle().getType() + integer)
+                    .map(integer -> "Accept " + vehicleTypeToOutputString.get(vehicleParkTransaction.getVehicle().getType()) + integer)
                     .orElse("Reject");
         } else {
             Optional<VehicleExitInfo> vehicleExitInfoOptional = parkValet.exit(vehicleParkTransaction.getVehicle(), vehicleParkTransaction.getTime());
             return vehicleExitInfoOptional
-                    .map(exitInfo -> "" + vehicleParkTransaction.getVehicle().getType() + exitInfo.getReleasedLotNumber() + " " + exitInfo.getParkingFee())
+                    .map(exitInfo -> "" + vehicleTypeToOutputString.get(vehicleParkTransaction.getVehicle().getType()) + exitInfo.getReleasedLotNumber() + " " + exitInfo.getParkingFee())
                     .orElse("Error: No vehicle with vehicle number " + vehicleParkTransaction.getVehicle().getVehicleNumber() + " parked");
         }
     }
