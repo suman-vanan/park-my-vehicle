@@ -14,12 +14,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.StringJoiner;
 
 public class App {
     public static void main(String[] args) {
-        // to pass args, in project folder run `./gradlew run --args="<absolute_path_of_file>"`
-        // use default file if no filepath is passed as args
-        String filePath = "src/main/resources/input.txt";
+        // to pass an input file as args, in project folder run `./gradlew run --args="<absolute_path_of_file>"`
+        String filePath = "src/main/resources/input.txt"; // use default file if no filepath is passed as args
         if (args.length > 0) {
             filePath = args[0];
         }
@@ -29,28 +29,31 @@ public class App {
             String inputString = IOUtils.toString(fis, StandardCharsets.UTF_8);
             ParsedInput parsedInput = InputParser.parse(inputString);
 
-            Queue<VehicleParkTransaction> vehicleQueue = parsedInput.getVehicleParkTransactions();
-            CarParkValet parkValet = new CarParkValet(parsedInput.getNumOfCarParkingLots(), parsedInput.getNumOfMotorcycleParkingLots());
+            CarParkValet valet = new CarParkValet(parsedInput.getNumOfCarParkingLots(), parsedInput.getNumOfMotorcycleParkingLots());
 
+            Queue<VehicleParkTransaction> vehicleQueue = parsedInput.getVehicleParkTransactions();
+            StringJoiner stringJoiner = new StringJoiner(System.lineSeparator());
             while (!vehicleQueue.isEmpty()) {
-                VehicleParkTransaction vehicleParkTransaction = vehicleQueue.remove();
-                if (vehicleParkTransaction.isEntry()) {
-                    Optional<Integer> lotNumOptional = parkValet.admit(vehicleParkTransaction.getVehicle(), vehicleParkTransaction.getTime());
-                    if (lotNumOptional.isPresent()) {
-                        System.out.println("Accept " + vehicleParkTransaction.getVehicle().getType() + lotNumOptional.get());
-                    } else {
-                        System.out.println("Reject");
-                    }
-                } else {
-                    Optional<VehicleExitInfo> vehicleExitInfoOptional = parkValet.exit(vehicleParkTransaction.getVehicle(), vehicleParkTransaction.getTime());
-                    if (vehicleExitInfoOptional.isPresent()) {
-                        VehicleExitInfo exitInfo = vehicleExitInfoOptional.get();
-                        System.out.println("" + vehicleParkTransaction.getVehicle().getType() + exitInfo.getReleasedLotNumber() + " " + exitInfo.getParkingFee());
-                    }
-                }
+                stringJoiner.add(processEvent(valet, vehicleQueue.remove()));
             }
+            System.out.println(stringJoiner);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private static String processEvent(CarParkValet parkValet, VehicleParkTransaction vehicleParkTransaction) {
+        // only two types of events: entry & exit
+        if (vehicleParkTransaction.isEntry()) {
+            Optional<Integer> lotNumOptional = parkValet.admit(vehicleParkTransaction.getVehicle(), vehicleParkTransaction.getTime());
+            return lotNumOptional
+                    .map(integer -> "Accept " + vehicleParkTransaction.getVehicle().getType() + integer)
+                    .orElse("Reject");
+        } else {
+            Optional<VehicleExitInfo> vehicleExitInfoOptional = parkValet.exit(vehicleParkTransaction.getVehicle(), vehicleParkTransaction.getTime());
+            return vehicleExitInfoOptional
+                    .map(exitInfo -> "" + vehicleParkTransaction.getVehicle().getType() + exitInfo.getReleasedLotNumber() + " " + exitInfo.getParkingFee())
+                    .orElse("Error: No vehicle with vehicle number " + vehicleParkTransaction.getVehicle().getVehicleNumber() + " parked");
         }
     }
 }
