@@ -20,7 +20,7 @@ import java.util.StringJoiner;
 
 public class App {
     public static void main(String[] args) {
-        // to pass an input file as args, in project folder run `./gradlew run --args="<absolute_path_of_file>"`
+        // to pass an input file as args, see README.md
         String filePath = "src/main/resources/input.txt"; // use default file if no filepath is passed as args
         if (args.length > 0) {
             filePath = args[0];
