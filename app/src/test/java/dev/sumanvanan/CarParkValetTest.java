@@ -1,6 +1,7 @@
 package dev.sumanvanan;
 
 import dev.sumanvanan.model.Vehicle;
+import dev.sumanvanan.model.VehicleExitInfo;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
@@ -106,5 +107,21 @@ class CarParkValetTest {
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void givenParkedVehicles_WhenExit_CorrectParkingFeeReturned() {
+        CarParkValet testValet = new CarParkValet(1, 0);
+
+        Vehicle testVehicle = new Vehicle("testVehicle", Vehicle.Type.CAR);
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime oneHourAndOneMinuteLater = now.plusMinutes(61);
+
+        testValet.admit(testVehicle, now);
+        Optional<VehicleExitInfo> vehicleExitInfoOptional = testValet.exit(testVehicle, oneHourAndOneMinuteLater);
+
+        assertTrue(vehicleExitInfoOptional.isPresent());
+        assertEquals(4, vehicleExitInfoOptional.get().getParkingFee());
     }
 }
