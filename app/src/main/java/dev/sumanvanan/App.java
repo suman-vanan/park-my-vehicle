@@ -19,12 +19,9 @@ import java.util.Queue;
 import java.util.StringJoiner;
 
 public class App {
+    // For instructions on how to run app, see README.md
     public static void main(String[] args) {
-        // to pass an input file as args, see README.md
-        String filePath = "src/main/resources/input.txt"; // use default file if no filepath is passed as args
-        if (args.length > 0) {
-            filePath = args[0];
-        }
+        String filePath = getFilePath(args);
 
         // stop execution if exception is thrown
         try (FileInputStream fis = new FileInputStream(filePath)) {
@@ -34,14 +31,27 @@ public class App {
             CarParkValet valet = new CarParkValet(parsedInput.getNumOfCarParkingLots(), parsedInput.getNumOfMotorcycleParkingLots());
 
             Queue<VehicleParkTransaction> vehicleQueue = parsedInput.getVehicleParkTransactions();
-            StringJoiner stringJoiner = new StringJoiner(System.lineSeparator());
-            while (!vehicleQueue.isEmpty()) {
-                stringJoiner.add(processEvent(valet, vehicleQueue.remove()));
-            }
-            System.out.println(stringJoiner);
+            StringJoiner output = getOutput(vehicleQueue, valet);
+            System.out.println(output);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static String getFilePath(String[] args) {
+        String filePath = "src/main/resources/input.txt"; // use default file if no filepath is passed as args
+        if (args.length > 0) {
+            filePath = args[0];
+        }
+        return filePath;
+    }
+
+    private static StringJoiner getOutput(Queue<VehicleParkTransaction> vehicleQueue, CarParkValet valet) {
+        StringJoiner stringJoiner = new StringJoiner(System.lineSeparator());
+        while (!vehicleQueue.isEmpty()) {
+            stringJoiner.add(processEvent(valet, vehicleQueue.remove()));
+        }
+        return stringJoiner;
     }
 
     private static final Map<Vehicle.Type, String> vehicleTypeToOutputString = Map.of(
